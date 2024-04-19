@@ -1,0 +1,76 @@
+name: "Wittig - Deploy"
+author: "info@wittig.nl"
+description: "-"
+inputs:
+  ARCHIVE:
+    description: 'Store the build artifacts'
+    required: false
+    default: 'false'
+  DOTENV_KEY_NAME:
+    description: 'The name of the key in the .env.keys file to decrypt the .env files'
+    required: true
+  DOTENV_KEY_VALUE:
+    description: 'The value for the key in the .env.keys file to decrypt the .env files'
+    required: true
+  DOTENV_KEY_FILE_PATH:
+    description: 'The path for the .env.keys file to decrypt the .env files'
+    required: true
+    default: './packages/backend/.env.keys'
+  DEPLOY_SSH_HOST:
+    description: 'The SSH server to deploy to'
+    required: true
+  DEPLOY_SSH_USERNAME:
+    description: 'The SSH username to deploy with'
+    required: true
+  DEPLOY_SSH_KEY:
+    description: 'The SSH private key to deploy with'
+    required: true
+  DEPLOY_PATH:
+    description: 'The path to deploy to on the target server'
+    required: true
+  PM2_NAME:
+    description: 'The name of the PM2 process to restart after deployment'
+    required: true
+  DEPLOY_PROXY_SSH_PORT:
+    description: 'The SSH port of the deploy proxy (jump server)'
+    required: true
+  DEPLOY_PROXY_SSH_USERNAME:
+    description: 'The SSH username of the deploy proxy (jump server)'
+    required: true
+  DEPLOY_PROXY_SSH_HOST:
+    description: 'the SSH host of the deploy proxy (jump server)'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: 'Archive build'
+      uses: actions/upload-artifact@v4
+      if: ${{ env.INPUT_ARCHIVE == 'true' }}
+      with:
+        name: production-deployment
+        path: |
+          ./packages/**/dist
+          !./packages/**/node_modules
+
+    - name: 'Decrypt backend .env files'
+      shell: bash
+      run: |
+        echo "${{ env.INPUT_DOTENV_KEY_NAME }}=\"${{ env.INPUT_DOTENV_KEY_VALUE }}\"" > ${{ env.INPUT_DOTENV_KEY_FILE_PATH }}
+        pnpm run env:decrypt
+        rm ./packages/backend/.env.keys
+
+    - name: 'Deploy to Server'
+      uses: easingthemes/ssh-deploy@main
+      with:
+        REMOTE_HOST: ${{ env.INPUT_DEPLOY_SSH_HOST }}
+        REMOTE_USER: ${{ env.INPUT_DEPLOY_SSH_USERNAME }}
+        SSH_PRIVATE_KEY: ${{ env.INPUT_DEPLOY_SSH_KEY }}
+        ARGS: "-rlgoDzvc -i --delete"
+        SOURCE: "."
+        TARGET: ${{ env.INPUT_DEPLOY_PATH }}
+        EXCLUDE: "/node_modules/"
+        SSH_CMD_ARGS: "-o StrictHostKeyChecking=no, -o ProxyCommand='ssh -o StrictHostKeyChecking=no -p ${{ env.INPUT_DEPLOY_PROXY_SSH_PORT }} -i ~/.ssh/id_deploy -W %h:%p ${{ env.INPUT_DEPLOY_PROXY_SSH_USERNAME }}@${{ env.INPUT_DEPLOY_PROXY_SSH_HOST }}'"
+        SCRIPT_AFTER: |
+          cd ${{ env.INPUT_DEPLOY_PATH }}
+          pnpm install
+          pm2 restart ${{ env.INPUT_PM2_NAME }}
