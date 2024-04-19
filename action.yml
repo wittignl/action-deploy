@@ -7,9 +7,6 @@ inputs:
     description: 'Store the build artifacts'
     required: false
     default: false
-  PM2_NAME:
-    description: 'The name of the PM2 process to restart after deployment'
-    required: true
   # Env decryption
   DOTENV_KEY_NAME:
     description: 'The name of the key in the .env.keys file to decrypt the .env files'
@@ -34,6 +31,9 @@ inputs:
   DEPLOY_PATH:
     description: 'The path to deploy to on the target server'
     required: true
+  DEPLOY_SCRIPT_AFTER:
+    description: 'The script to run after the deployment has succeeded'
+    required: false
   # Deploy Proxy
   DEPLOY_PROXY_SSH_HOST:
     description: 'the SSH host of the deploy proxy (jump server)'
@@ -84,7 +84,4 @@ runs:
         TARGET: ${{ env.INPUT_DEPLOY_PATH }}
         EXCLUDE: "/node_modules/"
         SSH_CMD_ARGS: "-o StrictHostKeyChecking=no, -o ProxyCommand='ssh -o StrictHostKeyChecking=no -p ${{ env.INPUT_DEPLOY_PROXY_SSH_PORT }} -i ~/.ssh/id_deploy -W %h:%p ${{ env.INPUT_DEPLOY_PROXY_SSH_USERNAME }}@${{ env.INPUT_DEPLOY_PROXY_SSH_HOST }}'"
-        SCRIPT_AFTER: |
-          cd ${{ env.INPUT_DEPLOY_PATH }}
-          pnpm install
-          pm2 restart ${{ env.INPUT_PM2_NAME }}
+        SCRIPT_AFTER: ${{ env.INPUT_DEPLOY_SCRIPT_AFTER }}
