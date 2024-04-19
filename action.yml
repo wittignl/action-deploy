@@ -8,11 +8,11 @@ inputs:
     required: false
     default: false
   # Env decryption
-  DOTENV_KEY_NAME:
-    description: 'The name of the key in the .env.keys file to decrypt the .env files'
+  DOTENV_ENVIRONMENT:
+    description: 'The environment of the key in the .env.keys file to decrypt the .env file'
     required: true
-  DOTENV_KEY_VALUE:
-    description: 'The value for the key in the .env.keys file to decrypt the .env files'
+  DOTENV_KEY_FILE_CONTENT:
+    description: 'The contents for the key in the .env.keys file to decrypt the .env files'
     required: true
   DOTENV_KEY_FILE_PATH:
     description: 'The path for the .env.keys file to decrypt the .env files'
@@ -62,9 +62,11 @@ runs:
     - name: 'Decrypt backend .env files'
       shell: bash
       run: |
-        echo "${{ env.INPUT_DOTENV_KEY_NAME }}=\"${{ env.INPUT_DOTENV_KEY_VALUE }}\"" > ${{ env.INPUT_DOTENV_KEY_FILE_PATH }}
+        echo "${{ env.INPUT_DOTENV_KEY_FILE_CONTENT }}" > ${{ env.INPUT_DOTENV_KEY_FILE_PATH }}
         pnpm run env:decrypt
         rm ${{ env.INPUT_DOTENV_KEY_FILE_PATH }}
+        mv .env.${{ env.INPUT_DOTENV_ENVIRONMENT }} .env
+        rm .env.*
 
     - name: 'Prepare deploy proxy ssh key'
       shell: bash
