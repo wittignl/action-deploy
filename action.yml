@@ -64,7 +64,7 @@ runs:
       run: |
         echo "${{ env.INPUT_DOTENV_KEY_NAME }}=\"${{ env.INPUT_DOTENV_KEY_VALUE }}\"" > ${{ env.INPUT_DOTENV_KEY_FILE_PATH }}
         pnpm run env:decrypt
-        rm ./packages/backend/.env.keys
+        rm ${{ env.INPUT_DOTENV_KEY_FILE_PATH }}
 
     - name: 'Prepare deploy proxy ssh key'
       shell: bash
