@@ -5,7 +5,7 @@ inputs:
   ARCHIVE:
     description: 'Store the build artifacts'
     required: false
-    default: 'false'
+    default: false
   DOTENV_KEY_NAME:
     description: 'The name of the key in the .env.keys file to decrypt the .env files'
     required: true
@@ -14,7 +14,7 @@ inputs:
     required: true
   DOTENV_KEY_FILE_PATH:
     description: 'The path for the .env.keys file to decrypt the .env files'
-    required: true
+    required: false
     default: './packages/backend/.env.keys'
   DEPLOY_SSH_HOST:
     description: 'The SSH server to deploy to'
@@ -45,7 +45,7 @@ runs:
   steps:
     - name: 'Archive build'
       uses: actions/upload-artifact@v4
-      if: ${{ env.INPUT_ARCHIVE == 'true' }}
+      if: ${{ env.INPUT_ARCHIVE == true }}
       with:
         name: production-deployment
         path: |
