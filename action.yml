@@ -2,10 +2,15 @@ name: "Wittig - Deploy"
 author: "info@wittig.nl"
 description: "-"
 inputs:
+  # General
   ARCHIVE:
     description: 'Store the build artifacts'
     required: false
     default: false
+  PM2_NAME:
+    description: 'The name of the PM2 process to restart after deployment'
+    required: true
+  # Env decryption
   DOTENV_KEY_NAME:
     description: 'The name of the key in the .env.keys file to decrypt the .env files'
     required: true
@@ -16,6 +21,7 @@ inputs:
     description: 'The path for the .env.keys file to decrypt the .env files'
     required: false
     default: './packages/backend/.env.keys'
+  # Deploy server
   DEPLOY_SSH_HOST:
     description: 'The SSH server to deploy to'
     required: true
@@ -28,8 +34,9 @@ inputs:
   DEPLOY_PATH:
     description: 'The path to deploy to on the target server'
     required: true
-  PM2_NAME:
-    description: 'The name of the PM2 process to restart after deployment'
+  # Deploy Proxy
+  DEPLOY_PROXY_SSH_HOST:
+    description: 'the SSH host of the deploy proxy (jump server)'
     required: true
   DEPLOY_PROXY_SSH_PORT:
     description: 'The SSH port of the deploy proxy (jump server)'
@@ -37,8 +44,8 @@ inputs:
   DEPLOY_PROXY_SSH_USERNAME:
     description: 'The SSH username of the deploy proxy (jump server)'
     required: true
-  DEPLOY_PROXY_SSH_HOST:
-    description: 'the SSH host of the deploy proxy (jump server)'
+  DEPLOY_PROXY_SSH_KEY:
+    description: 'The SSH private key to connect to the deploy proxy (jump server)'
     required: true
 runs:
   using: "composite"
@@ -58,6 +65,13 @@ runs:
         echo "${{ env.INPUT_DOTENV_KEY_NAME }}=\"${{ env.INPUT_DOTENV_KEY_VALUE }}\"" > ${{ env.INPUT_DOTENV_KEY_FILE_PATH }}
         pnpm run env:decrypt
         rm ./packages/backend/.env.keys
+
+    - name: 'Prepare deploy proxy ssh key'
+      shell: bash
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ env.INPUT_DEPLOY_PROXY_SSH_KEY }}" > ~/.ssh/id_deploy
+        chmod 700 ~/.ssh/id_deploy
 
     - name: 'Deploy to Server'
       uses: easingthemes/ssh-deploy@main
