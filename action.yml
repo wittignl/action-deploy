@@ -7,13 +7,19 @@ inputs:
     description: 'Store the build artifacts'
     required: false
     default: false
+  ARCHIVE_PATH:
+    description: 'Paths to store in the build artifact'
+    required: false
+    default: |
+      ./packages/**/dist
+      !./packages/**/node_modules
   # Env decryption
   DOTENV_ENVIRONMENT:
     description: 'The environment of the key in the .env.keys file to decrypt the .env file'
-    required: true
+    required: false
   DOTENV_KEY_FILE_CONTENT:
     description: 'The contents for the key in the .env.keys file to decrypt the .env files'
-    required: true
+    required: false
   DOTENV_FILES_PATH:
     description: 'The path for the .env files'
     required: false
@@ -38,6 +44,10 @@ inputs:
   DEPLOY_SCRIPT_AFTER:
     description: 'The script to run after the deployment has succeeded'
     required: false
+  DEPLOY_EXCLUDE:
+    description: 'Exclusion paths that will not be synced to the target server'
+    required: false
+    default: '/node_modules/, /**/node_modules/, /.git/, /**/.git/, /**/src/, /.run/, /.turbo/, /.github/, /_server/, /vendor/, /**/vendor/'
   # Deploy Proxy
   DEPLOY_PROXY_SSH_HOST:
     description: 'the SSH host of the deploy proxy (jump server)'
@@ -59,12 +69,11 @@ runs:
       if: ${{ inputs.ARCHIVE == true }}
       with:
         name: deployment
-        path: |
-          ./packages/**/dist
-          !./packages/**/node_modules
+        path: ${{ inputs.ARCHIVE_PATH }}
 
     - name: 'Decrypt backend .env files'
       shell: bash
+      if: ${{ inputs.DOTENV_KEY_FILE_CONTENT != '' }}
       run: |
         echo "${{ inputs.DOTENV_KEY_FILE_CONTENT }}" > ${{ inputs.DOTENV_KEY_FILE_PATH }}
         pnpm run env:decrypt
@@ -88,7 +97,7 @@ runs:
         ARGS: "-rlgoDzvc -i --delete"
         SOURCE: "."
         TARGET: ${{ inputs.DEPLOY_PATH }}
-        EXCLUDE: "/node_modules/, /**/node_modules/, /.git/, /**/.git/, /**/src/"
+        EXCLUDE: ${{ inputs.DEPLOY_EXLUDE }}
         SSH_CMD_ARGS: "-o StrictHostKeyChecking=no, -o ProxyCommand='ssh -o StrictHostKeyChecking=no -p ${{ inputs.DEPLOY_PROXY_SSH_PORT }} -i ~/.ssh/id_deploy -W %h:%p ${{ inputs.DEPLOY_PROXY_SSH_USERNAME }}@${{ inputs.DEPLOY_PROXY_SSH_HOST }}'"
         #SCRIPT_AFTER: ${{ inputs.DEPLOY_SCRIPT_AFTER }}
 
