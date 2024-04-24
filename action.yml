@@ -90,4 +90,11 @@ runs:
         TARGET: ${{ inputs.DEPLOY_PATH }}
         EXCLUDE: "/node_modules/, /**/node_modules/, /.git/, /**/.git/, /**/src/"
         SSH_CMD_ARGS: "-o StrictHostKeyChecking=no, -o ProxyCommand='ssh -o StrictHostKeyChecking=no -p ${{ inputs.DEPLOY_PROXY_SSH_PORT }} -i ~/.ssh/id_deploy -W %h:%p ${{ inputs.DEPLOY_PROXY_SSH_USERNAME }}@${{ inputs.DEPLOY_PROXY_SSH_HOST }}'"
-        SCRIPT_AFTER: ${{ inputs.DEPLOY_SCRIPT_AFTER }}
+        #SCRIPT_AFTER: ${{ inputs.DEPLOY_SCRIPT_AFTER }}
+
+    - name: 'Running post deploy scripting hook'
+      if: ${{ inputs.DEPLOY_SCRIPT_AFTER != '' }}
+      run: |
+        echo '${{ inputs.DEPLOY_SSH_KEY }}' > ~/.ssh/id_tmp
+        ssh -i ~/.ssh/id_tmp -o StrictHostKeyChecking=no, -o ProxyCommand='ssh -o StrictHostKeyChecking=no -p ${{ inputs.DEPLOY_PROXY_SSH_PORT }} -i ~/.ssh/id_deploy -W %h:%p ${{ inputs.DEPLOY_PROXY_SSH_USERNAME }}@${{ inputs.DEPLOY_PROXY_SSH_HOST }}' ${{ inputs.DEPLOY_SSH_USERNAME }}@${{ inputs.DEPLOY_SSH_HOST }} "${{ inputs.DEPLOY_SCRIPT_AFTER }}"
+        rm ~/.ssh/id_tmp
