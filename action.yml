@@ -88,6 +88,6 @@ runs:
         ARGS: "-rlgoDzvc -i --delete"
         SOURCE: "."
         TARGET: ${{ inputs.DEPLOY_PATH }}
-        EXCLUDE: "/node_modules/, /**/node_modules/"
+        EXCLUDE: "/node_modules/, /**/node_modules/, /.git/, /**/.git/, /**/src/"
         SSH_CMD_ARGS: "-o StrictHostKeyChecking=no, -o ProxyCommand='ssh -o StrictHostKeyChecking=no -p ${{ inputs.DEPLOY_PROXY_SSH_PORT }} -i ~/.ssh/id_deploy -W %h:%p ${{ inputs.DEPLOY_PROXY_SSH_USERNAME }}@${{ inputs.DEPLOY_PROXY_SSH_HOST }}'"
         SCRIPT_AFTER: ${{ inputs.DEPLOY_SCRIPT_AFTER }}
