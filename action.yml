@@ -97,5 +97,6 @@ runs:
       shell: bash
       run: |
         echo '${{ inputs.DEPLOY_SSH_KEY }}' > ~/.ssh/id_tmp
+        chmod ~/.ssh/id_tmp 600
         ssh -i ~/.ssh/id_tmp -o StrictHostKeyChecking=no -o ProxyCommand='ssh -o StrictHostKeyChecking=no -p ${{ inputs.DEPLOY_PROXY_SSH_PORT }} -i ~/.ssh/id_deploy -W %h:%p ${{ inputs.DEPLOY_PROXY_SSH_USERNAME }}@${{ inputs.DEPLOY_PROXY_SSH_HOST }}' ${{ inputs.DEPLOY_SSH_USERNAME }}@${{ inputs.DEPLOY_SSH_HOST }} "${{ inputs.DEPLOY_SCRIPT_AFTER }}"
         rm ~/.ssh/id_tmp
