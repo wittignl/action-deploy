@@ -32,6 +32,10 @@ inputs:
   DEPLOY_SSH_HOST:
     description: 'The SSH server to deploy to'
     required: true
+  DEPLOY_SSH_PORT:
+    description: 'The SSH server port to deploy to'
+    required: false
+    default: 22
   DEPLOY_SSH_USERNAME:
     description: 'The SSH username to deploy with'
     required: true
@@ -92,6 +96,7 @@ runs:
       uses: easingthemes/ssh-deploy@main
       with:
         REMOTE_HOST: ${{ inputs.DEPLOY_SSH_HOST }}
+        REMOTE_PORT: ${{ inputs.DEPLOY_SSH_PORT }}
         REMOTE_USER: ${{ inputs.DEPLOY_SSH_USERNAME }}
         SSH_PRIVATE_KEY: ${{ inputs.DEPLOY_SSH_KEY }}
         ARGS: "-rlgoDzvc -i --delete"
