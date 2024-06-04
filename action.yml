@@ -112,5 +112,5 @@ runs:
       run: |
         echo '${{ inputs.DEPLOY_SSH_KEY }}' > ~/.ssh/id_tmp
         chmod 600 ~/.ssh/id_tmp
-        ssh -i ~/.ssh/id_tmp -o StrictHostKeyChecking=no -o ProxyCommand='ssh -o StrictHostKeyChecking=no -p ${{ inputs.DEPLOY_PROXY_SSH_PORT }} -i ~/.ssh/id_deploy -W %h:%p ${{ inputs.DEPLOY_PROXY_SSH_USERNAME }}@${{ inputs.DEPLOY_PROXY_SSH_HOST }}' ${{ inputs.DEPLOY_SSH_USERNAME }}@${{ inputs.DEPLOY_SSH_HOST }} "bash -ilc '${{ inputs.DEPLOY_SCRIPT_AFTER }}'"
+        ssh -i ~/.ssh/id_tmp -o StrictHostKeyChecking=no -o ProxyCommand='ssh -o StrictHostKeyChecking=no -p ${{ inputs.DEPLOY_PROXY_SSH_PORT }} -i ~/.ssh/id_deploy -W %h:%p ${{ inputs.DEPLOY_PROXY_SSH_USERNAME }}@${{ inputs.DEPLOY_PROXY_SSH_HOST }}' -p ${{ inputs.DEPLOY_SSH_PORT }} ${{ inputs.DEPLOY_SSH_USERNAME }}@${{ inputs.DEPLOY_SSH_HOST }} "bash -ilc '${{ inputs.DEPLOY_SCRIPT_AFTER }}'"
         rm ~/.ssh/id_tmp
