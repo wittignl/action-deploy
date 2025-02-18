@@ -55,7 +55,7 @@ inputs:
   DEPLOY_EXCLUDE:
     description: 'Exclusion paths that will not be synced to the target server'
     required: false
-    default: '/node_modules/, /**/node_modules/, /.git/, /**/.git/, /packages/**/src/, /.run/, /.turbo/, /.github/, /_server/, /vendor/, /**/vendor/'
+    default: '/node_modules/, /**/node_modules/, /.git/, /**/.git/, /packages/**/src/, /packages/**/logs/, /.run/, /.turbo/, /.github/, /_server/, /vendor/, /**/vendor/, /content/'
   # Deploy Proxy
   DEPLOY_PROXY_SSH_HOST:
     description: 'the SSH host of the deploy proxy (jump server)'
