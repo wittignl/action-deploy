@@ -74,7 +74,7 @@ runs:
   steps:
     - name: 'Archive build'
       uses: actions/upload-artifact@v7.0.2
-      if: ${{ inputs.ARCHIVE == true }}
+      if: ${{ inputs.ARCHIVE == 'true' }}
       with:
         name: deployment
         path: ${{ inputs.ARCHIVE_PATH }}
